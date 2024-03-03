@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+
+<html lang="ru">
+
+<head>
+    <meta charset="utf-8"/>
+    <title>Создание собственного HTML element</title>
+</head>
+
+<body>
+
+    <script>
+        "use strict";
+        function HtmlElement(tagName, isSelfClosing, textContent) {
+    this.tagName = tagName;
+    this.isSelfClosing = isSelfClosing;
+    this.textContent = textContent;
+    this.attributes = [];
+    this.styles = [];
+    this.children = [];
+
+    this.setAttribute = function(name, value) {
+        this.attributes.push({name, value});
+    };
+
+    this.setStyle = function(property, value) {
+        this.styles.push({property, value});
+    };
+
+    this.appendChild = function(childElement) {
+        this.children.push(childElement);
+    };
+
+    this.prependChild = function(childElement) {
+        this.children.unshift(childElement);
+    };
+
+    this.getHtml = function() {
+        let attrs = this.attributes.map(attr => `${attr.name}="${attr.value}"`).join(' ');
+        let style = this.styles.map(style => `${style.property}: ${style.value};`).join(' ');
+        if(style) {
+            attrs += (attrs ? ' ' : '') + `style="${style}"`;
+        }
+
+        let openingTag = `<${this.tagName}${attrs ? ' ' + attrs : ''}${this.isSelfClosing ? ' /' : ''}>`;
+        let closingTag = this.isSelfClosing ? '' : `</${this.tagName}>`;
+        let childrenHtml = this.children.map(child => child.getHtml()).join('');
+
+        return `${openingTag}${this.textContent}${childrenHtml}${closingTag}`;
+    };
+}
+
+let wrapper = new HtmlElement('div', false, '');
+wrapper.setAttribute('id', 'wrapper');
+wrapper.setStyle('display', 'flex');
+
+let div1 = new HtmlElement('div', false, '');
+div1.setStyle('width', '300px');
+div1.setStyle('margin', '10px');
+
+let h3 = new HtmlElement('h3', false, 'What is Lorem Ipsum?');
+div1.appendChild(h3);
+
+let img = new HtmlElement('img', true, '');
+img.setAttribute('src', 'lipsum.jpg');
+img.setAttribute('alt', 'Lorem Ipsum');
+img.setStyle('width', '100%');
+div1.appendChild(img);
+
+let p = new HtmlElement('p', false, 'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry\'s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.');
+p.setStyle('text-align', 'justify');
+
+let a = new HtmlElement('a', false, 'More...');
+a.setAttribute('href', 'https://www.lipsum.com/');
+a.setAttribute('target', '_blank');
+p.appendChild(a);
+
+div1.appendChild(p);
+
+wrapper.appendChild(div1);
+wrapper.appendChild(div1); 
+
+document.write(wrapper.getHtml());
+    </script>
+</body>
+
+
+</html>
